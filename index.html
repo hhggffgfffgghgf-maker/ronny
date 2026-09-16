@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | الإدارة والعملاء</title>
+    
+    <style>
+        /* إعدادات الخط الأساسية (Shaheen pro Arabic) */
+        @font-face {
+            font-family: 'Shaheen pro Arabic';
+            /* يرجى التأكد من استدعاء مسار الخط الصحيح إذا كان متوفراً محلياً أو عبر رابط */
+            src: local('Shaheen pro Arabic'), local('ShaheenPro-Regular');
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Shaheen pro Arabic', 'Tajawal', sans-serif; 
+        }
+
+        /* الثيم الليلي والداكن جداً */
+        body { 
+            background-color: #050505; /* أسود عميق */
+            color: #f5f5f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% -20%, #2a0800 0%, #050505 50%);
+        }
+        
+        .app-container {
+            width: 100%; 
+            max-width: 500px; 
+            min-height: 100vh; 
+            background-color: transparent; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            overflow-x: hidden;
+            transition: all 0.4s ease;
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 40px 20px; }
+            .app-container {
+                max-width: 1000px;
+                min-height: auto; 
+                background-color: #0a0a0a;
+                border-radius: 30px; 
+                box-shadow: 0 15px 50px rgba(0,0,0,0.8), 0 0 20px rgba(255, 51, 0, 0.05);
+                border: 1px solid #1a1a1a;
+            }
+        }
+
+        /* الشريط العلوي */
+        .header {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 69, 0, 0.2);
+            padding: 20px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-radius: 0 0 25px 25px;
+            z-index: 5;
+        }
+
+        @media (min-width: 768px) {
+            .header { border-radius: 30px 30px 0 0; }
+        }
+
+        .header h3 {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.4);
+        }
+
+        /* القائمة الجانبية (الهامبرغر) للمشرف */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .hamburger { 
+            display: none; 
+            cursor: pointer; 
+            flex-direction: column; 
+            gap: 6px; 
+            padding: 5px;
+        }
+        .hamburger div { 
+            width: 30px; 
+            height: 3px; 
+            background-color: #ff4500; 
+            border-radius: 5px; 
+            transition: 0.3s;
+            box-shadow: 0 0 5px rgba(255, 69, 0, 0.5);
+        }
+
+        /* زر التواصل مع المؤسس */
+        .btn-founder {
+            background: rgba(255, 51, 0, 0.1);
+            color: #ff4500;
+            border: 1px solid #ff4500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            animation: pulseGlow 2s infinite;
+        }
+        .btn-founder:hover {
+            background: #ff4500;
+            color: #fff;
+            box-shadow: 0 0 15px #ff4500;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(255, 69, 0, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 69, 0, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(255, 69, 0, 0.2); }
+        }
+
+        /* القائمة الجانبية */
+        .admin-nav {
+            position: absolute; 
+            top: 0; 
+            right: -280px; 
+            width: 280px; 
+            height: 100%;
+            background-color: #0d0d0d; 
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 10; 
+            padding: 30px 20px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            border-left: 1px solid rgba(255, 69, 0, 0.1);
+        }
+        .admin-nav.active { right: 0; }
+        .admin-nav a { 
+            display: block; 
+            color: #ccc; 
+            text-decoration: none; 
+            padding: 18px 15px; 
+            border-radius: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(255,255,255,0.02);
+        }
+        .admin-nav a:hover {
+            background: rgba(255, 69, 0, 0.1);
+            color: #fff;
+            transform: translateX(-5px);
+            box-shadow: inset -3px 0 0 #ff4500;
+        }
+        .close-nav { 
+            text-align: left; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: #ff3300; 
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+        .close-nav:hover { color: #fff; text-shadow: 0 0 10px #ff3300; }
+
+        /* منطقة المحتوى والبطاقات */
+        .content { 
+            padding: 40px 20px; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px;
+        }
+
+        /* حركات الظهور */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card { 
+            background-color: #111; 
+            border: 1px solid #1f1f1f; 
+            border-radius: 25px; 
+            padding: 35px 25px; 
+            margin-bottom: 20px; 
+            transition: all 0.3s ease;
+            animation: fadeUp 0.5s ease forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, #ff0000, #ff7300, #ff0000);
+            opacity: 0.3;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 69, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(255, 69, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #fff;
+            text-align: center;
+        }
+
+        /* حقول الإدخال */
+        .input-group { 
+            margin-bottom: 20px; 
+        }
+        .input-group input {
+            width: 100%; 
+            background: #0a0a0a; 
+            border: 1px solid #2a2a2a; 
+            color: #fff;
+            border-radius: 18px; 
+            padding: 18px 20px; 
+            font-size: 16px; 
+            outline: none; 
+            text-align: right;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .input-group input:focus {
+            border-color: #ff4500;
+            background: #111;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.2), inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .input-group input::placeholder {
+            color: #666;
+        }
+
+        /* الأزرار (Buttons) */
+        .btn {
+            width: 100%; 
+            background: linear-gradient(135deg, #d32f2f 0%, #ff5722 100%); 
+            color: #fff;
+            border: none; 
+            border-radius: 20px; 
+            padding: 18px; 
+            font-size: 1.1rem; 
+            font-weight: bold;
+            cursor: pointer; 
+            margin-top: 15px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5);
+        }
+        .btn:active { 
+            transform: translateY(1px); 
+            box-shadow: 0 2px 10px rgba(255, 69, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #1f1f1f;
+            box-shadow: none;
+            border: 1px solid #333;
+        }
+        .btn-secondary:hover {
+            background: #2a2a2a;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+            border-color: #444;
+        }
+
+        /* ألوان الأزرار المخصصة للمشرف */
+        .btn-danger { background: linear-gradient(135deg, #b71c1c, #e53935); box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3); }
+        .btn-danger:hover { box-shadow: 0 8px 25px rgba(229, 57, 53, 0.5); }
+        
+        .btn-success { background: linear-gradient(135deg, #1b5e20, #4caf50); box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); }
+        .btn-success:hover { box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5); }
+        
+        .btn-dark-danger { background: linear-gradient(135deg, #5c0000, #9b0000); box-shadow: 0 4px 15px rgba(155, 0, 0, 0.3); }
+        .btn-dark-danger:hover { box-shadow: 0 8px 25px rgba(155, 0, 0, 0.5); }
+
+        /* النصوص والروابط */
+        .link-text { 
+            color: #888; 
+            font-size: 15px; 
+            text-align: center; 
+            margin-top: 20px; 
+            cursor: pointer; 
+            display: block; 
+            transition: 0.3s;
+        }
+        .link-text:hover { color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.3); }
+        
+        .hidden { display: none !important; }
+
+        /* تنسيق النشاطات */
+        .activity-item { 
+            background: #0d0d0d; 
+            border: 1px solid #222; 
+            padding: 20px; 
+            border-radius: 18px; 
+            margin-bottom: 15px; 
+            font-size: 15px;
+            transition: 0.3s;
+            position: relative;
+        }
+        .activity-item:hover {
+            border-color: #ff4500;
+            background: #151515;
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.1);
+        }
+        .activity-item p { margin-bottom: 8px; color: #ddd; }
+        .activity-item p strong { color: #ff4500; font-weight: 700; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h3>لوحة التحكم</h3>
+            <div class="header-controls">
+                <a class="btn-founder" href="https://t.me/kvt71">تواصل مع المؤسس (المبرمج + المهندس)</a>
+                <div class="hamburger" id="hamburger-menu" onclick="toggleNav()">
+                    <div></div><div></div><div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة المشرف الجانبية -->
+        <div class="admin-nav" id="admin-nav">
+            <div class="close-nav" onclick="toggleNav()">X إغلاق</div>
+            <a onclick="showAdminSection('client-management')">إدارة العميل</a>
+            <a onclick="showAdminSection('client-activity')">البيانات المرسلة</a>
+            <a onclick="logout()">تسجيل الخروج</a>
+        </div>
+
+        <div class="content" id="main-content">
+            
+            <!-- شاشة اختيار نوع الدخول -->
+            <div id="selection-screen" class="card">
+                <h4>اختر صفة الدخول</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn" onclick="showScreen('admin-login-screen')">دخول كمشرف (المؤسس)</button>
+                    <button class="btn btn-secondary" onclick="initClientFlow()">دخول كعميل</button>
+                </div>
+            </div>
+
+            <!-- تسجيل دخول المشرف -->
+            <div id="admin-login-screen" class="card hidden">
+                <h4>تسجيل دخول المشرف</h4>
+                <div class="input-group">
+                    <input type="password" id="admin-pin" placeholder="الرمز السري للمشرف">
+                </div>
+                <button class="btn" onclick="loginAdmin()">دخول</button>
+                <span class="link-text" onclick="showScreen('selection-screen')">عودة للصفحة الرئيسية</span>
+            </div>
+
+            <!-- تسجيل دخول / إنشاء حساب العميل -->
+            <div id="client-auth-screen" class="card hidden">
+                <h4 id="client-title">تسجيل الدخول / العميل</h4>
+                
+                <div id="client-register-fields" class="hidden">
+                    <div class="input-group"><input type="text" id="client-name" placeholder="الاسم الكامل"></div>
+                    <div class="input-group"><input type="tel" id="client-phone" placeholder="رقم الهاتف"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="client-pin" placeholder="رمز PIN (4 أرقام)" maxlength="4">
+                </div>
+
+                <button class="btn" id="client-action-btn" onclick="handleClientAuth()">دخول</button>
+                <span class="link-text" id="forgot-pin-btn" onclick="showForgotPin()">نسيت رمز PIN؟</span>
+                <span class="link-text" onclick="showScreen('selection-screen')">عودة للصفحة الرئيسية</span>
+            </div>
+
+            <!-- لوحة تحكم المشرف: إدارة العميل -->
+            <div id="admin-client-management" class="card hidden">
+                <h4>إدارة العميل الوحيد</h4>
+                <div id="client-info-display" style="margin-top: 15px;">
+                    <p style="text-align:center; color:#888;">جاري التحميل...</p>
+                </div>
+            </div>
+
+            <!-- لوحة تحكم المشرف: نشاط العميل -->
+            <div id="admin-client-activity" class="card hidden">
+                <h4>البيانات المرسلة من الموقع</h4>
+                <div id="admin-activity-list" style="margin-top: 15px;">
+                    <p style="text-align:center; color:#888;">جاري التحميل...</p>
+                </div>
+            </div>
+
+            <!-- واجهة العميل (بعد الدخول) -->
+            <div id="client-dashboard" class="card hidden">
+                <h4>مرحباً بك في لوحة العميل</h4>
+                <p style="margin-top: 5px; margin-bottom: 25px; color: #aaa; text-align: center;">هذه قائمة البيانات والطلبات المرسلة من الموقع:</p>
+                <!-- قائمة البيانات الخاصة بالعميل -->
+                <div id="client-activity-list">
+                    <p style="text-align:center; color:#888;">جاري التحميل...</p>
+                </div>
+                <button class="btn btn-secondary" style="margin-top: 25px;" onclick="logout()">تسجيل الخروج</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- استدعاء مكتبات Firebase من مشروعك -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfJHyEUFzxp6qexJHJDwwh-WUX2aGjojY",
+            authDomain: "tasreef-dolar.firebaseapp.com",
+            projectId: "tasreef-dolar",
+            storageBucket: "tasreef-dolar.firebasestorage.app",
+            messagingSenderId: "579472040325",
+            appId: "1:579472040325:web:17ade35ff2a5bb2ae124ec"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // توليد أو استرجاع معرف الجهاز لربطه بالعميل
+        let deviceId = localStorage.getItem('userDeviceId');
+        if (!deviceId) {
+            deviceId = 'DEV-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('userDeviceId', deviceId);
+        }
+
+        let isForgotPinMode = false;
+
+        // وظائف التنقل بين الشاشات
+        function showScreen(screenId) {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function toggleNav() {
+            document.getElementById('admin-nav').classList.toggle('active');
+        }
+
+        function logout() {
+            document.getElementById('hamburger-menu').style.display = 'none';
+            document.getElementById('admin-nav').classList.remove('active');
+            showScreen('selection-screen');
+        }
+
+        // ================= دالة جلب البيانات المشتركة (تُعرض للعميل والمشرف) =================
+        async function loadActivityList(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '<p style="text-align:center; color:#888;">جاري جلب البيانات...</p>';
+            
+            try {
+                // جلب بيانات النشاط من مجموعة requests
+                const snapshot = await db.collection('requests').orderBy('timestamp', 'desc').limit(20).get();
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="text-align:center; color:#888;">لا توجد بيانات أو طلبات مسجلة حتى الآن.</p>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const req = doc.data();
+                    html += `
+                    <div class="activity-item">
+                        <p><strong>رقم الحساب:</strong> ${req.accountNumber || 'غير متوفر'}</p>
+                        <p><strong>الرقم الوطني:</strong> ${req.nationalId || 'غير متوفر'}</p>
+                        <p><strong>الفرع:</strong> ${req.branch || 'غير متوفر'}</p>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error("خطأ في جلب البيانات:", error);
+                container.innerHTML = '<p style="color:#ff3300; text-align:center;">حدث خطأ أثناء جلب البيانات. تأكد من الاتصال بقاعدة البيانات.</p>';
+            }
+        }
+
+        // ================= قسم المشرف =================
+        function loginAdmin() {
+            const pin = document.getElementById('admin-pin').value;
+            if (pin === '078924') {
+                document.getElementById('hamburger-menu').style.display = 'flex';
+                showAdminSection('client-management');
+            } else {
+                alert('الرمز السري خاطئ!');
+            }
+        }
+
+        function showAdminSection(section) {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById('admin-nav').classList.remove('active');
+            
+            if (section === 'client-management') {
+                document.getElementById('admin-client-management').classList.remove('hidden');
+                loadClientManagement();
+            } else if (section === 'client-activity') {
+                document.getElementById('admin-client-activity').classList.remove('hidden');
+                loadActivityList('admin-activity-list'); // استدعاء الدالة للمشرف
+            }
+        }
+
+        async function loadClientManagement() {
+            const container = document.getElementById('client-info-display');
+            const snapshot = await db.collection('clients').limit(1).get();
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p style="text-align:center; color:#888;">لا يوجد عميل مسجل حالياً. النظام جاهز لاستقبال عميل جديد.</p>';
+                return;
+            }
+
+            const doc = snapshot.docs[0];
+            const client = doc.data();
+            
+            let html = `<div class="activity-item">
+                <p><strong>الاسم:</strong> ${client.name}</p>
+                <p><strong>الهاتف:</strong> ${client.phone}</p>
+                <p><strong>الحالة:</strong> ${client.status === 'pending' ? 'قيد الموافقة' : client.status === 'approved' ? 'نشط' : 'محظور'}</p>
+            `;
+
+            // أزرار الحظر والموافقة
+            if (client.status === 'pending') {
+                html += `<button class="btn btn-success" onclick="updateClientStatus('${doc.id}', 'approved')">موافقة</button>`;
+            } else if (client.status === 'approved') {
+                html += `<button class="btn btn-danger" onclick="updateClientStatus('${doc.id}', 'blocked')">حظر الجهاز</button>`;
+            } else {
+                html += `<button class="btn btn-success" onclick="updateClientStatus('${doc.id}', 'approved')">فك الحظر</button>`;
+            }
+            
+            // إضافة خيار الحذف النهائي في كل الحالات لفتح المجال لعميل آخر
+            html += `<button class="btn btn-dark-danger" onclick="deleteClient('${doc.id}')">حذف العميل نهائياً (إفساح المجال لجديد)</button>`;
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function updateClientStatus(docId, status) {
+            await db.collection('clients').doc(docId).update({ status: status });
+            alert('تم تحديث حالة العميل.');
+            loadClientManagement();
+        }
+        
+        async function deleteClient(docId) {
+            if (confirm('هل أنت متأكد من حذف هذا العميل نهائياً؟ سيسمح هذا لعميل آخر بالتسجيل في النظام.')) {
+                await db.collection('clients').doc(docId).delete();
+                alert('تم مسح العميل بنجاح.');
+                loadClientManagement();
+            }
+        }
+
+        // ================= قسم العميل =================
+        async function initClientFlow() {
+            showScreen('client-auth-screen');
+            isForgotPinMode = false;
+            
+            // البحث عن العميل عبر معرف الجهاز
+            const snapshot = await db.collection('clients').where('deviceId', '==', deviceId).get();
+            
+            if (!snapshot.empty) {
+                // الجهاز معروف (تسجيل دخول فقط بالـ PIN)
+                document.getElementById('client-title').innerText = 'تسجيل الدخول (العودة)';
+                document.getElementById('client-register-fields').classList.add('hidden');
+                document.getElementById('forgot-pin-btn').classList.remove('hidden');
+                document.getElementById('client-action-btn').innerText = 'تسجيل الدخول';
+            } else {
+                // جهاز جديد (إنشاء حساب)
+                document.getElementById('client-title').innerText = 'تسجيل عميل جديد';
+                document.getElementById('client-register-fields').classList.remove('hidden');
+                document.getElementById('forgot-pin-btn').classList.add('hidden');
+                document.getElementById('client-action-btn').innerText = 'إنشاء حساب';
+            }
+        }
+
+        function showForgotPin() {
+            isForgotPinMode = true;
+            document.getElementById('client-title').innerText = 'استعادة رمز PIN';
+            document.getElementById('client-register-fields').classList.remove('hidden');
+            document.getElementById('client-action-btn').innerText = 'تأكيد الرمز الجديد';
+        }
+
+        async function handleClientAuth() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const pin = document.getElementById('client-pin').value;
+
+            if (pin.length !== 4) { alert('رمز PIN يجب أن يكون 4 أرقام.'); return; }
+
+            const btn = document.getElementById('client-action-btn');
+            btn.disabled = true;
+            btn.innerText = 'جاري المعالجة...';
+
+            try {
+                if (isForgotPinMode) {
+                    // استعادة PIN
+                    const snapshot = await db.collection('clients')
+                        .where('deviceId', '==', deviceId)
+                        .where('name', '==', name)
+                        .where('phone', '==', phone).get();
+                    
+                    if (snapshot.empty) {
+                        alert('البيانات غير متطابقة.');
+                    } else {
+                        await db.collection('clients').doc(snapshot.docs[0].id).update({ pin: pin });
+                        alert('تم تحديث الرمز بنجاح! سيتم تسجيل دخولك الآن.');
+                        loginClient(snapshot.docs[0].data());
+                    }
+                } else if (!document.getElementById('client-register-fields').classList.contains('hidden')) {
+                    // تسجيل جديد
+                    if(!name || !phone) { alert('يرجى تعبئة الاسم ورقم الهاتف.'); btn.disabled = false; btn.innerText = 'إنشاء حساب'; return; }
+                    
+                    // التحقق من عدم وجود عميل آخر في النظام (لأن الموقع يقبل عميل واحد فقط)
+                    const checkExisting = await db.collection('clients').get();
+                    if (!checkExisting.empty) {
+                        alert('عذراً، الموقع يقبل تسجيلاً لعميل واحد فقط، وهناك عميل مسجل مسبقاً.');
+                        btn.disabled = false; btn.innerText = 'إنشاء حساب'; return;
+                    }
+
+                    await db.collection('clients').add({
+                        name: name,
+                        phone: phone,
+                        pin: pin,
+                        deviceId: deviceId,
+                        status: 'pending',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    alert('تم إرسال طلبك. يرجى انتظار موافقة المشرف.');
+                    showScreen('selection-screen');
+                } else {
+                    // تسجيل دخول طبيعي بالـ PIN فقط
+                    const snapshot = await db.collection('clients').where('deviceId', '==', deviceId).where('pin', '==', pin).get();
+                    if (snapshot.empty) {
+                        alert('رمز PIN غير صحيح.');
+                    } else {
+                        const clientData = snapshot.docs[0].data();
+                        loginClient(clientData);
+                    }
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("حدث خطأ أثناء الاتصال بقاعدة البيانات.");
+            }
+            
+            btn.disabled = false;
+            btn.innerText = isForgotPinMode ? 'تأكيد الرمز الجديد' : (!document.getElementById('client-register-fields').classList.contains('hidden') ? 'إنشاء حساب' : 'تسجيل الدخول');
+        }
+
+        function loginClient(clientData) {
+            if (clientData.status === 'pending') {
+                alert('حسابك قيد المراجعة ولم تتم الموافقة عليه من قبل المشرف بعد.');
+                showScreen('selection-screen');
+            } else if (clientData.status === 'blocked') {
+                alert('تم حظر جهازك من قبل المشرف. لا يمكنك الدخول.');
+                showScreen('selection-screen');
+            } else {
+                // دخول ناجح للعميل
+                showScreen('client-dashboard');
+                // استدعاء دالة عرض البيانات لتظهر للعميل فوراً
+                loadActivityList('client-activity-list');
+            }
+        }
+    </script>
+</body>
+</html>
